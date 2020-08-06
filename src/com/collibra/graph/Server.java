@@ -8,7 +8,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.UUID;
 
-public class Main {
+/**
+ * Simple server TCP socket server implementation.
+ */
+public class Server {
 
     private static final int PORT_NUMBER = 50000;
     public static final int SO_TIMEOUT_MS = 30000;
@@ -30,7 +33,7 @@ public class Main {
                         sendMessage(socket, "SORRY, I DID NOT UNDERSTAND THAT");
                     }
                     if ("BYE MATE!".equals(readReceivedMessage(socket))) {
-                        long  endTime= System.nanoTime();
+                        long endTime = System.nanoTime();
                         long duration = (endTime - startTime) / 1000000;
                         sendMessage(socket, String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
                     }
