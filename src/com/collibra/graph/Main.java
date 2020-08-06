@@ -21,6 +21,7 @@ public class Main {
                     socket.setSoTimeout(SO_TIMEOUT_MS);
                     long startTime = System.nanoTime();
                     sendMessage(socket, "HI, I AM " + UUID.randomUUID());
+                    //TODO (vagharshak): Replace ```split(..)``` with Pattern matcher.
                     String clientName = readReceivedMessage(socket).split(" ")[3];
                     sendMessage(socket, "HI " + clientName);
                     String receivedMessage = readReceivedMessage(socket);
@@ -29,7 +30,7 @@ public class Main {
                         sendMessage(socket, "SORRY, I DID NOT UNDERSTAND THAT");
                     }
                     if ("BYE MATE!".equals(readReceivedMessage(socket))) {
-                        long endTime = System.nanoTime();
+                        long  endTime= System.nanoTime();
                         long duration = (endTime - startTime) / 1000000;
                         sendMessage(socket, String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
                     }
