@@ -1,5 +1,8 @@
 package com.collibra.graph;
 
+import com.collibra.exceptions.NodeAlreadyExistsException;
+import com.collibra.exceptions.NodeNotFoundException;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,18 +14,19 @@ public class GraphImpl implements Graph {
     private final Set<Node> nodes = new HashSet<>();
 
     @Override
-    public void addNode(Node node) {
+    public void addNode(Node node) throws NodeAlreadyExistsException {
         if (nodes.contains(node)) {
-            throw new IllegalStateException("ERROR: NODE ALREADY EXISTS.");
+            throw new NodeAlreadyExistsException("ERROR: NODE ALREADY EXISTS");
         }
         nodes.add(node);
     }
 
     @Override
-    public void removeNode(Node node) {
+    public void removeNode(Node node) throws NodeNotFoundException {
         if (!nodes.contains(node)) {
-            throw new IllegalStateException("ERROR: NODE NOT FOUND.");
+            throw new NodeNotFoundException("ERROR: NODE NOT FOUND");
         }
+        node.getAdjacentNodes().clear();
         nodes.remove(node);
     }
 
@@ -32,20 +36,20 @@ public class GraphImpl implements Graph {
     }
 
     @Override
-    public void addEdge(Node source, Node destination, int weight) {
+    public void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException {
         checkNodeExistence(source, destination);
         findNode(source).getAdjacentNodes().putIfAbsent(destination, weight);
     }
 
     @Override
-    public void removeEdge(Node source, Node destination) {
+    public void removeEdge(Node source, Node destination) throws NodeNotFoundException {
         checkNodeExistence(source, destination);
         findNode(source).getAdjacentNodes().remove(destination);
     }
 
-    private void checkNodeExistence(Node source, Node destination) {
+    private void checkNodeExistence(Node source, Node destination) throws NodeNotFoundException {
         if (!nodes.contains(source) || !nodes.contains(destination)) {
-            throw new IllegalStateException("ERROR: NODE NOT FOUND.");
+            throw new NodeNotFoundException("ERROR: NODE NOT FOUND.");
         }
     }
 

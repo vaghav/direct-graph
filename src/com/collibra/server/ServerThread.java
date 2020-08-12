@@ -1,8 +1,11 @@
 package com.collibra.server;
 
+import com.collibra.exceptions.NodeAlreadyExistsException;
+import com.collibra.exceptions.NodeNotFoundException;
 import com.collibra.graph.Graph;
 import com.collibra.graph.GraphImpl;
 import com.collibra.graph.Node;
+import com.collibra.server.util.ParsedMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,14 +14,16 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import static com.collibra.server.util.MessageParser.parseReceivedMessage;
+
+/**
+ * Thread which is responsible to handle client connection and graph processing.
+ */
 public class ServerThread extends Thread {
 
-    private static Graph graph = new GraphImpl();
-
-    private Socket socket;
+    private final Socket socket;
+    private final Graph graph = new GraphImpl();
 
     public ServerThread(Socket socket) {
         this.socket = socket;
@@ -26,42 +31,77 @@ public class ServerThread extends Thread {
 
     public void run() {
         long startTime = System.nanoTime();
-        String clientName = null;
+        java.lang.String clientName = null;
         PrintWriter outData = null;
         try {
             BufferedReader inData = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outData = new PrintWriter(socket.getOutputStream(), true);
             handshake(outData);
             while (true) {
-                Pattern clientNamePattern = Pattern.compile("^HI, I AM ([A-Za-z0-9\\-]+)$");
-                String input = readReceivedMessage(inData);
-                Matcher clientNameMatcher = clientNamePattern.matcher(input);
-                if (clientNameMatcher.find()) {
-                    clientName = clientNameMatcher.group(1);
-                    sendMessage(outData, "HI " + clientName);
-                }
-
-                //TODO: Handle graph processing requests.
-                //handleClientRequests(socket);
-
-                String receivedMessage = readReceivedMessage(inData);
-                if (!receivedMessage.matches("HI, I AM .*")
-                        && !"BYE MATE!".equals(receivedMessage)) {
-                    sendMessage(outData, "SORRY, I DID NOT UNDERSTAND THAT");
-                }
-
-                String receivedMessage1 = readReceivedMessage(inData);
-                if ("BYE MATE!".equals(receivedMessage1)) {
-                    long endTime = System.nanoTime();
-                    long duration = (endTime - startTime) / 1000000;
-                    sendMessage(outData, String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
+                java.lang.String receivedMessage = readReceivedMessage(inData);
+                ParsedMessage parsedMessage = parseReceivedMessage(receivedMessage);
+                //TODO: Use strategy or state pattern to get rid of switch/case.
+                switch (parsedMessage.getCommand()) {
+                    case HI:
+                        clientName = parsedMessage.getClientName();
+                        sendMessage(outData, "HI " + clientName);
+                        break;
+                    case BYE:
+                        long endTime = System.nanoTime();
+                        long duration = (endTime - startTime) / 1000000;
+                        sendMessage(outData, java.lang.String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
+                        break;
+                    case ADD_NODE:
+                        try {
+                            graph.addNode(new Node(parsedMessage.getSourceNodeName()));
+                            sendMessage(outData, "NODE ADDED");
+                        } catch (NodeAlreadyExistsException ex) {
+                            System.out.println("Node already exists");
+                            sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
+                        }
+                        break;
+                    case REMOVE_NODE:
+                        try {
+                            graph.removeNode(new Node(parsedMessage.getSourceNodeName()));
+                            sendMessage(outData, "NODE REMOVED");
+                        } catch (NodeNotFoundException ex) {
+                            System.out.println("ERROR: NODE NOT FOUND");
+                            sendMessage(outData, "ERROR: NODE NOT FOUND");
+                        }
+                        break;
+                    case ADD_EDGE:
+                        try {
+                            graph.addEdge(new Node(parsedMessage.getSourceNodeName()),
+                                    new Node(parsedMessage.getDestinationNodeName()),
+                                    parsedMessage.getWeight());
+                            sendMessage(outData, "EDGE ADDED");
+                        } catch (NodeNotFoundException ex) {
+                            System.out.println("ERROR: NODE NOT FOUND");
+                            sendMessage(outData, "ERROR: NODE NOT FOUND");
+                        }
+                        break;
+                    case REMOVE_EDGE:
+                        try {
+                            graph.removeEdge(new Node(parsedMessage.getSourceNodeName()),
+                                    new Node(parsedMessage.getDestinationNodeName()));
+                            sendMessage(outData, "EDGE REMOVED");
+                        } catch (NodeNotFoundException ex) {
+                            System.out.println("ERROR: NODE NOT FOUND");
+                            sendMessage(outData, "ERROR: NODE NOT FOUND");
+                        }
+                        break;
+                    case INVALID:
+                        sendMessage(outData, "SORRY, I DID NOT UNDERSTAND THAT");
+                        break;
+                    default:
+                        sendMessage(outData, "SORRY, I DID NOT UNDERSTAND THAT");
                 }
             }
         } catch (SocketTimeoutException ex) {
             if (outData != null) {
                 long endTime = System.nanoTime();
                 long duration = (endTime - startTime) / 1000000;
-                sendMessage(outData, String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
+                sendMessage(outData, java.lang.String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
             } else {
                 System.out.printf("Socket timeout exception happened: [%s]", ex.getCause());
             }
@@ -79,30 +119,7 @@ public class ServerThread extends Thread {
         }
     }
 
-    private void handleClientRequests(Socket socket) throws IOException {
-        // initialize only once
-        BufferedReader inData = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        PrintWriter outData = new PrintWriter(socket.getOutputStream(), true);
-
-        String receivedMessage = readReceivedMessage(inData);
-
-        if (!receivedMessage.isEmpty()) {
-            Pattern pattern = Pattern.compile("^ADD NODE ([A-Za-z0-9\\-]+)$");
-            Matcher matcher = pattern.matcher(receivedMessage);
-            boolean isAddNodeCommand = matcher.find();
-
-            if (isAddNodeCommand) {
-                synchronized (this) {
-                    graph.addNode(new Node(matcher.group(1)));
-                }
-                sendMessage(outData, "NODE ADDED");
-            }
-        } else {
-            sendMessage(outData, "SORRY, I DID NOT UNDERSTAND THAT");
-        }
-    }
-
-    private static void handshake(PrintWriter outData) throws IOException {
+    private static void handshake(PrintWriter outData) {
         sendMessage(outData, "HI, I AM " + UUID.randomUUID());
     }
 

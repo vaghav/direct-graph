@@ -2,6 +2,9 @@ package com.collibra.graph;
 
 import java.util.*;
 
+/**
+ * Represents graph node.
+ */
 public class Node {
     private final String name;
 

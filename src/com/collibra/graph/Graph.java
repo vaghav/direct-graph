@@ -1,5 +1,8 @@
 package com.collibra.graph;
 
+import com.collibra.exceptions.NodeAlreadyExistsException;
+import com.collibra.exceptions.NodeNotFoundException;
+
 import java.util.List;
 
 /**
@@ -8,21 +11,27 @@ import java.util.List;
 public interface Graph {
 
     /**
-     * Add node to the graph with provided node
+     * Add node to the graph with provided node.
      */
-    void addNode(Node node);
+    void addNode(Node node) throws NodeAlreadyExistsException;
 
     /**
-     * Add nodes to the graph with provided node
+     * Add nodes to the graph with provided node.
      */
     void addNodes(List<Node> nodes);
 
     /**
-     * Add edge from source to destination node with a given weight
+     * Add edge from source to destination node with a given weight.
      */
-    void addEdge(Node source, Node destination, int weight);
+    void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException;
 
-    void removeNode(Node node);
+    /**
+     * Remove provided node from the graph.
+     */
+    void removeNode(Node node) throws NodeNotFoundException;
 
-    void removeEdge(Node source, Node destination);
+    /**
+     * Remove edge from the graph.
+     */
+    void removeEdge(Node source, Node destination) throws NodeNotFoundException;
 }

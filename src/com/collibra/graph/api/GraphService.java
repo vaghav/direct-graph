@@ -2,7 +2,9 @@ package com.collibra.graph.api;
 
 import com.collibra.graph.Node;
 
-/* Exposes API for direct graph. */
+/**
+ * Exposes API for direct graph.
+ */
 public interface GraphService {
     /**
      * @param source      node from which starting processing
