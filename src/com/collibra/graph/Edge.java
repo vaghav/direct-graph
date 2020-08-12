@@ -1,18 +1,12 @@
 package com.collibra.graph;
 
 class Edge {
-    private final Node source;
     private final Node destination;
     private final int weight;
 
-    public Edge(Node source, Node destination, int weight) {
-        this.source = source;
+    public Edge( Node destination, int weight) {
         this.destination = destination;
         this.weight = weight;
-    }
-
-    public Node getSource() {
-        return source;
     }
 
     public Node getDestination() {
