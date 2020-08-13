@@ -14,7 +14,7 @@ public class GraphImpl implements Graph {
     private final Set<Node> nodes = new HashSet<>();
 
     @Override
-    public void addNode(Node node) throws NodeAlreadyExistsException {
+    public synchronized void addNode(Node node) throws NodeAlreadyExistsException {
         if (nodes.contains(node)) {
             throw new NodeAlreadyExistsException("ERROR: NODE ALREADY EXISTS");
         }
@@ -22,7 +22,7 @@ public class GraphImpl implements Graph {
     }
 
     @Override
-    public void removeNode(Node node) throws NodeNotFoundException {
+    public synchronized void removeNode(Node node) throws NodeNotFoundException {
         if (!nodes.contains(node)) {
             throw new NodeNotFoundException("ERROR: NODE NOT FOUND");
         }
@@ -31,32 +31,35 @@ public class GraphImpl implements Graph {
     }
 
     @Override
-    public void addNodes(List<Node> nodes) {
+    public synchronized void addNodes(List<Node> nodes) {
         this.nodes.addAll(nodes);
     }
 
     @Override
-    public void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException {
-        checkNodeExistence(source, destination);
-        findNode(source).getAdjacentNodes().putIfAbsent(destination, weight);
+    public synchronized void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException {
+        checkNodeExistence(source);
+        checkNodeExistence(destination);
+        if (nodes.contains(source)) {
+            source.getAdjacentNodes().putIfAbsent(destination, weight);
+        }
     }
 
     @Override
-    public void removeEdge(Node source, Node destination) throws NodeNotFoundException {
-        checkNodeExistence(source, destination);
-        findNode(source).getAdjacentNodes().remove(destination);
+    public synchronized void removeEdge(Node source, Node destination) throws NodeNotFoundException {
+        checkNodeExistence(source);
+        checkNodeExistence(destination);
+        if (nodes.contains(source)) {
+            source.getAdjacentNodes().remove(destination);
+        }
     }
 
-    private void checkNodeExistence(Node source, Node destination) throws NodeNotFoundException {
-        if (!nodes.contains(source) || !nodes.contains(destination)) {
+    private void checkNodeExistence(Node source) throws NodeNotFoundException {
+        if (!nodes.contains(source)) {
             throw new NodeNotFoundException("ERROR: NODE NOT FOUND.");
         }
     }
 
-    private Node findNode(Node source) {
-        return nodes.stream().filter(node -> node.equals(source)).findFirst().get();
-    }
-
+    //TODO: Rewrite unit tests and remove the method
     Set<Node> getNodes() {
         return nodes;
     }

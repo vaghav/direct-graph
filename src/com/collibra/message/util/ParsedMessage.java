@@ -14,7 +14,7 @@ public class ParsedMessage {
 
     private final String clientName;
 
-    public ParsedMessage(CommandMessageBuilder messageBuilder) {
+    private ParsedMessage(CommandMessageBuilder messageBuilder) {
         this.command = messageBuilder.command;
         this.sourceNodeName = messageBuilder.sourceNodeName;
         this.destinationNodeName = messageBuilder.destinationNodeName;

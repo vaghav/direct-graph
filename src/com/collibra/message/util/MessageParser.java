@@ -20,7 +20,7 @@ public final class MessageParser {
     private MessageParser() {
     }
 
-    public static ParsedMessage parseReceivedMessage(java.lang.String receivedMessage) {
+    public static ParsedMessage parseReceivedMessage(String receivedMessage) {
         Matcher clientNameMatcher = clientNamePattern.matcher(receivedMessage);
         Matcher addNodeMatcher = addNodePattern.matcher(receivedMessage);
         Matcher removeNodeMatcher = removeNodePattern.matcher(receivedMessage);
@@ -50,11 +50,5 @@ public final class MessageParser {
                     .setDestinationNodeName(removeEdgeMatcher.group("toNodeName")).build();
         }
         return new ParsedMessage.CommandMessageBuilder().setCommand(Command.INVALID).build();
-    }
-
-
-    public static void sendMessage(PrintWriter outData, String message) {
-        System.out.println("Sending message " + message);
-        outData.println(message);
     }
 }

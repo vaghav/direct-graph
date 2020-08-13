@@ -11,6 +11,7 @@ public class GraphServiceImpl implements GraphService {
 
     @Override
     public Integer findShortestPath(Node source, Node destination) {
+        //TODO: Handle case for unconnected nodes
         source.setDistance(0);
 
         Set<Node> settledNodes = new HashSet<>();
@@ -53,7 +54,7 @@ public class GraphServiceImpl implements GraphService {
         Integer sourceDistance = sourceNode.getDistance();
         if (sourceDistance + edgeWeigh < evaluationNode.getDistance()) {
             evaluationNode.setDistance(sourceDistance + edgeWeigh);
-            List<Node> shortestPath = new ArrayList<>(sourceNode.getShortestPath());
+            List<Node> shortestPath = new LinkedList<>(sourceNode.getShortestPath());
             shortestPath.add(sourceNode);
             evaluationNode.setShortestPath(shortestPath);
         }
