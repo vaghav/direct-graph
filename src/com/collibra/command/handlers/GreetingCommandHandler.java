@@ -1,24 +1,21 @@
 package com.collibra.command.handlers;
 
-import com.collibra.message.util.ParsedMessage;
-
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
 
-import static com.collibra.message.util.MessageUtil.sendMessage;
+import static com.collibra.message.util.MessageParser.clientNamePattern;
+import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
  * Greeting edge command handler implementation.
  */
 public class GreetingCommandHandler implements CommandHandler {
-    private final String clientName;
-
-    public GreetingCommandHandler(String clientName) {
-        this.clientName = clientName;
-    }
 
     @Override
-    public void handleCommand(PrintWriter outData, ParsedMessage parsedMessage) {
-        parsedMessage.getClientName();
-        sendMessage(outData, "HI " + clientName);
+    public void handleCommand(PrintWriter outData, String receivedMessage) {
+        Matcher clientNameMatcher = clientNamePattern.matcher(receivedMessage);
+        if (clientNameMatcher.find()) {
+            sendMessage(outData, "HI " + clientNameMatcher.group("clientName"));
+        }
     }
 }

@@ -6,11 +6,10 @@ import java.io.PrintWriter;
 import java.util.UUID;
 
 /**
- * Utility class for message transfer.
+ * Utility class for message exchange.
  */
-public final class MessageUtil {
-
-    private MessageUtil() {
+public final class CommunicationUtil {
+    private CommunicationUtil() {
     }
 
     public static void sendMessage(PrintWriter outData, String message) {
@@ -21,7 +20,7 @@ public final class MessageUtil {
     public static String readReceivedMessage(BufferedReader inData) throws IOException {
         String incomingData = inData.readLine();
         if (incomingData == null) {
-            // null means that a client closed a socket
+            // Null means that a client closed a socket
             throw new IOException("Socket closed");
         }
         return incomingData;

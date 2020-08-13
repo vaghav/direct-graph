@@ -3,16 +3,18 @@ package com.collibra.command.handlers;
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.graph.Graph;
 import com.collibra.graph.Node;
-import com.collibra.message.util.ParsedMessage;
 
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static com.collibra.message.util.MessageUtil.sendMessage;
+import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
  * Add node command handler implementation.
  */
 public class AddNodeCommandHandler implements CommandHandler {
+    private static final Pattern addNodePattern = Pattern.compile("^ADD NODE (?<nodeName>[A-Za-z0-9\\-]+)$");
     private final Graph graph;
 
     public AddNodeCommandHandler(Graph graph) {
@@ -20,13 +22,16 @@ public class AddNodeCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(PrintWriter outData, ParsedMessage parsedMessage) {
-        try {
-            graph.addNode(new Node(parsedMessage.getSourceNodeName()));
-            sendMessage(outData, "NODE ADDED");
-        } catch (NodeAlreadyExistsException ex) {
-            System.out.println("Node already exists");
-            sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
+    public void handleCommand(PrintWriter outData, String receivedMessage) {
+        Matcher addNodeMatcher = addNodePattern.matcher(receivedMessage);
+        if (addNodeMatcher.find()) {
+            try {
+                graph.addNode(new Node(addNodeMatcher.group("nodeName")));
+                sendMessage(outData, "NODE ADDED");
+            } catch (NodeAlreadyExistsException ex) {
+                System.out.println("Node already exists");
+                sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
+            }
         }
     }
 }

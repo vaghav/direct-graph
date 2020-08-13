@@ -31,6 +31,7 @@ public class Server {
                 socket.setSoTimeout(SO_TIMEOUT_MS);
                 Graph graph = new GraphImpl();
                 Map<Command, CommandHandler> commandToHandler = new ConcurrentHashMap<>();
+                commandToHandler.put(HI, new GreetingCommandHandler());
                 commandToHandler.put(ADD_NODE, new AddNodeCommandHandler(graph));
                 commandToHandler.put(REMOVE_NODE, new RemoveNodeCommandHandler(graph));
                 commandToHandler.put(ADD_EDGE, new AddEdgeCommandHandler(graph));

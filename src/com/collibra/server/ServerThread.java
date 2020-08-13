@@ -2,9 +2,7 @@ package com.collibra.server;
 
 import com.collibra.command.handlers.ByeCommandHandler;
 import com.collibra.command.handlers.CommandHandler;
-import com.collibra.command.handlers.GreetingCommandHandler;
 import com.collibra.message.util.Command;
-import com.collibra.message.util.ParsedMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,9 +14,10 @@ import java.util.Map;
 
 import static com.collibra.message.util.Command.BYE;
 import static com.collibra.message.util.Command.HI;
-import static com.collibra.message.util.MessageParser.parseReceivedMessage;
-import static com.collibra.message.util.MessageUtil.handshake;
-import static com.collibra.message.util.MessageUtil.readReceivedMessage;
+import static com.collibra.message.util.MessageParser.extractClientName;
+import static com.collibra.message.util.MessageParser.extractCommand;
+import static com.collibra.message.util.CommunicationUtil.handshake;
+import static com.collibra.message.util.CommunicationUtil.readReceivedMessage;
 
 /**
  * Thread which is responsible to handle client connection and graph processing.
@@ -36,19 +35,17 @@ public class ServerThread extends Thread {
     public void run() {
         long startTime = System.nanoTime();
         PrintWriter outData = null;
-        String clientName;
         try {
             BufferedReader inData = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outData = new PrintWriter(socket.getOutputStream(), true);
             handshake(outData);
             while (true) {
-                ParsedMessage parsedMessage = parseReceivedMessage(readReceivedMessage(inData));
-                clientName = parsedMessage.getClientName();
-                commandToHandler.put(HI, new GreetingCommandHandler(clientName));
-                if (clientName != null) {
-                    commandToHandler.put(BYE, new ByeCommandHandler(clientName, startTime));
+                String receivedMessage = readReceivedMessage(inData);
+                Command command = extractCommand(receivedMessage);
+                if (command == HI) {
+                    commandToHandler.put(BYE, new ByeCommandHandler(extractClientName(receivedMessage), startTime));
                 }
-                commandToHandler.get(parsedMessage.getCommand()).handleCommand(outData, parsedMessage);
+                commandToHandler.get(command).handleCommand(outData, receivedMessage);
             }
         } catch (SocketTimeoutException ex) {
             handleSocketTimeoutException(outData, ex);
@@ -61,8 +58,7 @@ public class ServerThread extends Thread {
 
     private void handleSocketTimeoutException(PrintWriter outData, SocketTimeoutException ex) {
         if (outData != null) {
-            commandToHandler.get(BYE).handleCommand(outData,
-                    new ParsedMessage.CommandMessageBuilder().build());
+            commandToHandler.get(BYE).handleCommand(outData, null);
         } else {
             System.out.printf("Socket timeout exception happened: [%s]", ex.getCause());
         }
