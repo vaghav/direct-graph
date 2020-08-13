@@ -1,5 +1,6 @@
-package com.collibra.server.util;
+package com.collibra.message.util;
 
+import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,5 +50,11 @@ public final class MessageParser {
                     .setDestinationNodeName(removeEdgeMatcher.group("toNodeName")).build();
         }
         return new ParsedMessage.CommandMessageBuilder().setCommand(Command.INVALID).build();
+    }
+
+
+    public static void sendMessage(PrintWriter outData, String message) {
+        System.out.println("Sending message " + message);
+        outData.println(message);
     }
 }

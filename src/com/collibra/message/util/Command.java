@@ -1,4 +1,4 @@
-package com.collibra.server.util;
+package com.collibra.message.util;
 
 /**
  * Represents the possible commands received from the client.

@@ -5,7 +5,7 @@ import com.collibra.exceptions.NodeNotFoundException;
 import com.collibra.graph.Graph;
 import com.collibra.graph.GraphImpl;
 import com.collibra.graph.Node;
-import com.collibra.server.util.ParsedMessage;
+import com.collibra.message.util.ParsedMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +15,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.UUID;
 
-import static com.collibra.server.util.MessageParser.parseReceivedMessage;
+import static com.collibra.message.util.MessageParser.parseReceivedMessage;
+import static com.collibra.message.util.MessageParser.sendMessage;
 
 /**
  * Thread which is responsible to handle client connection and graph processing.
@@ -43,52 +44,22 @@ public class ServerThread extends Thread {
                 //TODO: Use strategy or state pattern to get rid of switch/case.
                 switch (parsedMessage.getCommand()) {
                     case HI:
-                        clientName = parsedMessage.getClientName();
-                        sendMessage(outData, "HI " + clientName);
+                        clientName = sendHi(outData, parsedMessage);
                         break;
                     case BYE:
-                        long endTime = System.nanoTime();
-                        long duration = (endTime - startTime) / 1000000;
-                        sendMessage(outData, java.lang.String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
+                        sayGoodBye(startTime, clientName, outData);
                         break;
                     case ADD_NODE:
-                        try {
-                            graph.addNode(new Node(parsedMessage.getSourceNodeName()));
-                            sendMessage(outData, "NODE ADDED");
-                        } catch (NodeAlreadyExistsException ex) {
-                            System.out.println("Node already exists");
-                            sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
-                        }
+                        addNode(outData, parsedMessage);
                         break;
                     case REMOVE_NODE:
-                        try {
-                            graph.removeNode(new Node(parsedMessage.getSourceNodeName()));
-                            sendMessage(outData, "NODE REMOVED");
-                        } catch (NodeNotFoundException ex) {
-                            System.out.println("ERROR: NODE NOT FOUND");
-                            sendMessage(outData, "ERROR: NODE NOT FOUND");
-                        }
+                        removeNode(outData, parsedMessage);
                         break;
                     case ADD_EDGE:
-                        try {
-                            graph.addEdge(new Node(parsedMessage.getSourceNodeName()),
-                                    new Node(parsedMessage.getDestinationNodeName()),
-                                    parsedMessage.getWeight());
-                            sendMessage(outData, "EDGE ADDED");
-                        } catch (NodeNotFoundException ex) {
-                            System.out.println("ERROR: NODE NOT FOUND");
-                            sendMessage(outData, "ERROR: NODE NOT FOUND");
-                        }
+                        addEdge(outData, parsedMessage);
                         break;
                     case REMOVE_EDGE:
-                        try {
-                            graph.removeEdge(new Node(parsedMessage.getSourceNodeName()),
-                                    new Node(parsedMessage.getDestinationNodeName()));
-                            sendMessage(outData, "EDGE REMOVED");
-                        } catch (NodeNotFoundException ex) {
-                            System.out.println("ERROR: NODE NOT FOUND");
-                            sendMessage(outData, "ERROR: NODE NOT FOUND");
-                        }
+                        removeEdge(outData, parsedMessage);
                         break;
                     case INVALID:
                         sendMessage(outData, "SORRY, I DID NOT UNDERSTAND THAT");
@@ -99,9 +70,7 @@ public class ServerThread extends Thread {
             }
         } catch (SocketTimeoutException ex) {
             if (outData != null) {
-                long endTime = System.nanoTime();
-                long duration = (endTime - startTime) / 1000000;
-                sendMessage(outData, java.lang.String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
+                sayGoodBye(startTime, clientName, outData);
             } else {
                 System.out.printf("Socket timeout exception happened: [%s]", ex.getCause());
             }
@@ -119,6 +88,63 @@ public class ServerThread extends Thread {
         }
     }
 
+    private void sayGoodBye(long startTime, String clientName, PrintWriter outData) {
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime) / 1000000;
+        sendMessage(outData, String.format("BYE %s, WE SPOKE FOR %d MS",
+                clientName, duration));
+    }
+
+    private String sendHi(PrintWriter outData, ParsedMessage parsedMessage) {
+        String clientName;
+        clientName = parsedMessage.getClientName();
+        sendMessage(outData, "HI " + clientName);
+        return clientName;
+    }
+
+    private void addNode(PrintWriter outData, ParsedMessage parsedMessage) {
+        try {
+            graph.addNode(new Node(parsedMessage.getSourceNodeName()));
+            sendMessage(outData, "NODE ADDED");
+        } catch (NodeAlreadyExistsException ex) {
+            System.out.println("Node already exists");
+            sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
+        }
+    }
+
+    private void removeNode(PrintWriter outData, ParsedMessage parsedMessage) {
+        try {
+            graph.removeNode(new Node(parsedMessage.getSourceNodeName()));
+            sendMessage(outData, "NODE REMOVED");
+        } catch (NodeNotFoundException ex) {
+            System.out.println("ERROR: NODE NOT FOUND");
+            sendMessage(outData, "ERROR: NODE NOT FOUND");
+        }
+    }
+
+    private void addEdge(PrintWriter outData, ParsedMessage parsedMessage) {
+        try {
+            graph.addEdge(new Node(parsedMessage.getSourceNodeName()),
+                    new Node(parsedMessage.getDestinationNodeName()),
+                    parsedMessage.getWeight());
+            sendMessage(outData, "EDGE ADDED");
+        } catch (NodeNotFoundException ex) {
+            System.out.println("ERROR: NODE NOT FOUND");
+            sendMessage(outData, "ERROR: NODE NOT FOUND");
+        }
+    }
+
+    private void removeEdge(PrintWriter outData, ParsedMessage parsedMessage) {
+        try {
+            graph.removeEdge(new Node(parsedMessage.getSourceNodeName()),
+                    new Node(parsedMessage.getDestinationNodeName()));
+            sendMessage(outData, "EDGE REMOVED");
+        } catch (NodeNotFoundException ex) {
+            System.out.println("ERROR: NODE NOT FOUND");
+            sendMessage(outData, "ERROR: NODE NOT FOUND");
+        }
+    }
+
     private static void handshake(PrintWriter outData) {
         sendMessage(outData, "HI, I AM " + UUID.randomUUID());
     }
@@ -130,10 +156,5 @@ public class ServerThread extends Thread {
             throw new IOException("Socket closed");
         }
         return incomingData;
-    }
-
-    private static void sendMessage(PrintWriter outData, String message) {
-        System.out.println("Sending message " + message);
-        outData.println(message);
     }
 }

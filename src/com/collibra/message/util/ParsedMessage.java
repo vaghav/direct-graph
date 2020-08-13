@@ -1,4 +1,4 @@
-package com.collibra.server.util;
+package com.collibra.message.util;
 
 /**
  * Represents command with message metadata received from the client.
