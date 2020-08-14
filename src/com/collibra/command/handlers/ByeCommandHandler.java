@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
- * Bye edge command handler implementation.
+ * Implements bye command handler.
  */
 public class ByeCommandHandler implements CommandHandler {
     private final String clientName;

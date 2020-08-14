@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.UUID;
+import java.util.regex.Matcher;
+
+import static com.collibra.message.util.CommandExtractor.clientNamePattern;
 
 /**
  * Utility class for message exchange.
@@ -28,5 +31,14 @@ public final class CommunicationUtil {
 
     public static void handshake(PrintWriter outData) {
         sendMessage(outData, "HI, I AM " + UUID.randomUUID());
+    }
+
+    public static String extractClientName(String receivedMessage) {
+        Matcher clientNameMatcher = clientNamePattern.matcher(receivedMessage);
+        if (clientNameMatcher.find()) {
+            return clientNameMatcher.group("clientName");
+        }
+        throw new IllegalArgumentException(String.format("Couldn't not extract 'clientname' " +
+                "from received [%s] message. ", receivedMessage));
     }
 }

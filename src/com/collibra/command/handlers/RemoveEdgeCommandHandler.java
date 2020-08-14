@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
- * Remove edge command handler implementation.
+ * Implements remove edge command handler.
  */
 public class RemoveEdgeCommandHandler implements CommandHandler {
     private static final Pattern removeEdgePattern = Pattern.compile("^REMOVE EDGE (?<fromNodeName>[A-Za-z0-9\\-]+) " +
@@ -25,15 +25,17 @@ public class RemoveEdgeCommandHandler implements CommandHandler {
     @Override
     public void handleCommand(PrintWriter outData, String receivedMessage) {
         Matcher removeEdgeMatcher = removeEdgePattern.matcher(receivedMessage);
-        if (removeEdgeMatcher.find()) {
-            try {
-                graph.removeEdge(new Node(removeEdgeMatcher.group("fromNodeName")),
-                        new Node(removeEdgeMatcher.group("toNodeName")));
-                sendMessage(outData, "EDGE REMOVED");
-            } catch (NodeNotFoundException ex) {
-                System.out.println("ERROR: NODE NOT FOUND");
-                sendMessage(outData, "ERROR: NODE NOT FOUND");
-            }
+        if (!removeEdgeMatcher.find()) {
+            throw new IllegalArgumentException(String.format("[%s] is not valid command for edge removal",
+                    receivedMessage));
+        }
+        try {
+            graph.removeEdge(new Node(removeEdgeMatcher.group("fromNodeName")),
+                    new Node(removeEdgeMatcher.group("toNodeName")));
+            sendMessage(outData, "EDGE REMOVED");
+        } catch (NodeNotFoundException ex) {
+            System.out.println("Node doesn't exist in the graph: " + ex.getMessage());
+            sendMessage(outData, "ERROR: NODE NOT FOUND");
         }
     }
 }

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
- * Add edge command handler implementation.
+ * Implements add edge command handler.
  */
 public class AddEdgeCommandHandler implements CommandHandler {
     private static final Pattern addEdgePattern = Pattern.compile("^ADD EDGE (?<fromNodeName>[A-Za-z0-9\\-]+) " +
@@ -25,17 +25,18 @@ public class AddEdgeCommandHandler implements CommandHandler {
     @Override
     public void handleCommand(PrintWriter outData, String receivedMessage) {
         Matcher addEdgeMatcher = addEdgePattern.matcher(receivedMessage);
-        if (addEdgeMatcher.find()) {
-            try {
-                graph.addEdge(new Node(addEdgeMatcher.group("fromNodeName")),
-                        new Node(addEdgeMatcher.group("toNodeName")),
-                        Integer.parseInt(addEdgeMatcher.group("weight")));
-                sendMessage(outData, "EDGE ADDED");
-            } catch (
-                    NodeNotFoundException ex) {
-                System.out.println("ERROR: NODE NOT FOUND");
-                sendMessage(outData, "ERROR: NODE NOT FOUND");
-            }
+        if (!addEdgeMatcher.find()) {
+            throw new IllegalArgumentException(String.format("[%s] is not valid command for edge adding",
+                    receivedMessage));
+        }
+        try {
+            graph.addEdge(new Node(addEdgeMatcher.group("fromNodeName")),
+                    new Node(addEdgeMatcher.group("toNodeName")),
+                    Integer.parseInt(addEdgeMatcher.group("weight")));
+            sendMessage(outData, "EDGE ADDED");
+        } catch (NodeNotFoundException ex) {
+            System.out.println("Node doesn't exist in the graph: " + ex.getMessage());
+            sendMessage(outData, "ERROR: NODE NOT FOUND");
         }
     }
 }

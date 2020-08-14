@@ -2,6 +2,7 @@ package com.collibra.graph;
 
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.exceptions.NodeNotFoundException;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -35,7 +36,7 @@ class GraphImplTest {
         GraphImpl graph = new GraphImpl();
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
-        graph.addNodes(Arrays.asList(nodeA, nodeB));
+        graph.addNodes(ImmutableList.of(nodeA, nodeB));
         graph.removeNode(nodeB);
 
         assertThat(graph.getNodes()).containsExactly(nodeA);
@@ -46,7 +47,7 @@ class GraphImplTest {
         GraphImpl graph = new GraphImpl();
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
-        graph.addNodes(Arrays.asList(nodeA, nodeB));
+        graph.addNodes(ImmutableList.of(nodeA, nodeB));
         assertThatThrownBy(() ->
                 graph.removeNode(new Node("C"))).isInstanceOf(NodeNotFoundException.class)
                 .hasMessageContaining("ERROR: NODE NOT FOUND");
@@ -72,7 +73,7 @@ class GraphImplTest {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
-        graph.addNodes(Arrays.asList(nodeA, nodeB, nodeC));
+        graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
         graph.addEdge(nodeA, nodeB, 5);
         graph.addEdge(nodeA, nodeC, 10);
         graph.removeEdge(nodeA, nodeB);

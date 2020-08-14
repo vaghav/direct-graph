@@ -1,6 +1,9 @@
 package com.collibra.graph.api;
 
+import com.collibra.graph.Graph;
+import com.collibra.graph.GraphImpl;
 import com.collibra.graph.Node;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,14 +11,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GraphServiceImplTest {
 
     @Test
-    public void findShortestPath_returnsShortestPathValue() {
+    public void findShortestPath_returnsShortestPathValueCase1() {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
         nodeA.getAdjacentNodes().put(nodeB, 10);
         nodeA.getAdjacentNodes().put(nodeC, 15);
         nodeB.getAdjacentNodes().put(nodeC, 3);
-        GraphServiceImpl service = new GraphServiceImpl();
+        Graph graph = new GraphImpl();
+        graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
+        GraphServiceImpl service = new GraphServiceImpl(graph);
         Integer shortestPath = service.findShortestPath(nodeA, nodeC);
 
         assertThat(shortestPath).isEqualTo(13);
@@ -29,8 +34,9 @@ class GraphServiceImplTest {
         nodeA.getAdjacentNodes().put(nodeB, 10);
         nodeA.getAdjacentNodes().put(nodeC, 9);
         nodeB.getAdjacentNodes().put(nodeC, 3);
-
-        GraphServiceImpl service = new GraphServiceImpl();
+        Graph graph = new GraphImpl();
+        graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
+        GraphServiceImpl service = new GraphServiceImpl(graph);
         Integer shortestPath = service.findShortestPath(nodeA, nodeC);
 
         assertThat(shortestPath).isEqualTo(9);
@@ -44,7 +50,9 @@ class GraphServiceImplTest {
         nodeA.getAdjacentNodes().put(nodeB, 10);
         nodeA.getAdjacentNodes().put(nodeC, 9);
         nodeB.getAdjacentNodes().put(nodeC, 3);
-        GraphServiceImpl service = new GraphServiceImpl();
+        Graph graph = new GraphImpl();
+        graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
+        GraphServiceImpl service = new GraphServiceImpl(graph);
         Integer shortestPath = service.findShortestPath(nodeA, nodeC);
 
         assertThat(shortestPath).isEqualTo(9);

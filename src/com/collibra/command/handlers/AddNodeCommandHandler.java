@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
- * Add node command handler implementation.
+ * Implements add node command handler.
  */
 public class AddNodeCommandHandler implements CommandHandler {
     private static final Pattern addNodePattern = Pattern.compile("^ADD NODE (?<nodeName>[A-Za-z0-9\\-]+)$");
@@ -24,14 +24,16 @@ public class AddNodeCommandHandler implements CommandHandler {
     @Override
     public void handleCommand(PrintWriter outData, String receivedMessage) {
         Matcher addNodeMatcher = addNodePattern.matcher(receivedMessage);
-        if (addNodeMatcher.find()) {
-            try {
-                graph.addNode(new Node(addNodeMatcher.group("nodeName")));
-                sendMessage(outData, "NODE ADDED");
-            } catch (NodeAlreadyExistsException ex) {
-                System.out.println("Node already exists");
-                sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
-            }
+        if (!addNodeMatcher.find()) {
+            throw new IllegalArgumentException(String.format("[%s] is not valid command for node adding",
+                    receivedMessage));
+        }
+        try {
+            graph.addNode(new Node(addNodeMatcher.group("nodeName")));
+            sendMessage(outData, "NODE ADDED");
+        } catch (NodeAlreadyExistsException ex) {
+            System.out.println("Node already exist in the graph: " + ex.getMessage());
+            sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
         }
     }
 }

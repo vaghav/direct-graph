@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
- * Invalid command handler.
+ * Implements invalid command handler.
  */
 public class InvalidCommandHandler implements CommandHandler {
     @Override

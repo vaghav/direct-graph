@@ -12,12 +12,9 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Map;
 
-import static com.collibra.message.util.Command.BYE;
-import static com.collibra.message.util.Command.HI;
-import static com.collibra.message.util.MessageParser.extractClientName;
-import static com.collibra.message.util.MessageParser.extractCommand;
-import static com.collibra.message.util.CommunicationUtil.handshake;
-import static com.collibra.message.util.CommunicationUtil.readReceivedMessage;
+import static com.collibra.message.util.Command.*;
+import static com.collibra.message.util.CommandExtractor.extractCommand;
+import static com.collibra.message.util.CommunicationUtil.*;
 
 /**
  * Thread which is responsible to handle client connection and graph processing.
@@ -51,6 +48,9 @@ public class ServerThread extends Thread {
             handleSocketTimeoutException(outData, ex);
         } catch (IOException ex) {
             System.out.printf("Connection interrupted due to [%s]%n", ex.getCause());
+        } catch (IllegalArgumentException ex) {
+            System.out.printf("Received invalid arguments for command. [%s]%n", ex.getCause());
+            commandToHandler.get(INVALID).handleCommand(outData, "");
         } finally {
             releaseResources(outData);
         }

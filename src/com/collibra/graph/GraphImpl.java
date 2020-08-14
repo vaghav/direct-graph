@@ -8,15 +8,20 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Implementation of directed graph API.
+ * Exposes the API for directed graph.
  */
 public class GraphImpl implements Graph {
     private final Set<Node> nodes = new HashSet<>();
 
     @Override
+    public Set<Node> getNodes() {
+        return nodes;
+    }
+
+    @Override
     public synchronized void addNode(Node node) throws NodeAlreadyExistsException {
         if (nodes.contains(node)) {
-            throw new NodeAlreadyExistsException("ERROR: NODE ALREADY EXISTS");
+            throw new NodeAlreadyExistsException("Node already exists in the graph: '" + node.getName() + "'");
         }
         nodes.add(node);
     }
@@ -24,8 +29,9 @@ public class GraphImpl implements Graph {
     @Override
     public synchronized void removeNode(Node node) throws NodeNotFoundException {
         if (!nodes.contains(node)) {
-            throw new NodeNotFoundException("ERROR: NODE NOT FOUND");
+            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + node.getName() + "'");
         }
+        nodes.forEach(vertex -> vertex.getAdjacentNodes().remove(node));
         node.getAdjacentNodes().clear();
         nodes.remove(node);
     }
@@ -39,28 +45,19 @@ public class GraphImpl implements Graph {
     public synchronized void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException {
         checkNodeExistence(source);
         checkNodeExistence(destination);
-        if (nodes.contains(source)) {
-            source.getAdjacentNodes().putIfAbsent(destination, weight);
-        }
+        source.getAdjacentNodes().putIfAbsent(destination, weight);
     }
 
     @Override
     public synchronized void removeEdge(Node source, Node destination) throws NodeNotFoundException {
         checkNodeExistence(source);
         checkNodeExistence(destination);
-        if (nodes.contains(source)) {
-            source.getAdjacentNodes().remove(destination);
-        }
+        source.getAdjacentNodes().remove(destination);
     }
 
-    private void checkNodeExistence(Node source) throws NodeNotFoundException {
-        if (!nodes.contains(source)) {
-            throw new NodeNotFoundException("ERROR: NODE NOT FOUND.");
+    private void checkNodeExistence(Node node) throws NodeNotFoundException {
+        if (!nodes.contains(node)) {
+            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + node.getName() + "'");
         }
-    }
-
-    //TODO: Rewrite unit tests and remove the method
-    Set<Node> getNodes() {
-        return nodes;
     }
 }
