@@ -1,8 +1,8 @@
 package com.collibra.server;
 
-import com.collibra.command.handlers.ByeCommandHandler;
 import com.collibra.command.handlers.CommandHandler;
 import com.collibra.message.util.Command;
+import com.collibra.message.util.SessionContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,9 +12,11 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Map;
 
-import static com.collibra.message.util.Command.*;
+import static com.collibra.message.util.Command.BYE;
+import static com.collibra.message.util.Command.INVALID;
 import static com.collibra.message.util.CommandExtractor.extractCommand;
-import static com.collibra.message.util.CommunicationUtil.*;
+import static com.collibra.message.util.CommunicationUtil.handshake;
+import static com.collibra.message.util.CommunicationUtil.readReceivedMessage;
 
 /**
  * Thread which is responsible to handle client connection and graph processing.
@@ -35,14 +37,11 @@ public class ServerThread extends Thread {
         try {
             BufferedReader inData = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outData = new PrintWriter(socket.getOutputStream(), true);
-            handshake(outData);
+            String clientName = handshake(outData, inData);
             while (true) {
                 String receivedMessage = readReceivedMessage(inData);
-                Command command = extractCommand(receivedMessage);
-                if (command == HI) {
-                    commandToHandler.put(BYE, new ByeCommandHandler(extractClientName(receivedMessage), startTime));
-                }
-                commandToHandler.get(command).handleCommand(outData, receivedMessage);
+                commandToHandler.get(extractCommand(receivedMessage)).handleCommand(outData, receivedMessage,
+                        new SessionContext(clientName, startTime));
             }
         } catch (SocketTimeoutException ex) {
             handleSocketTimeoutException(outData, ex);
@@ -50,7 +49,7 @@ public class ServerThread extends Thread {
             System.out.printf("Connection interrupted due to [%s]%n", ex.getCause());
         } catch (IllegalArgumentException ex) {
             System.out.printf("Received invalid arguments for command. [%s]%n", ex.getCause());
-            commandToHandler.get(INVALID).handleCommand(outData, "");
+            commandToHandler.get(INVALID).handleCommand(outData, "", new SessionContext());
         } finally {
             releaseResources(outData);
         }
@@ -58,7 +57,7 @@ public class ServerThread extends Thread {
 
     private void handleSocketTimeoutException(PrintWriter outData, SocketTimeoutException ex) {
         if (outData != null) {
-            commandToHandler.get(BYE).handleCommand(outData, null);
+            commandToHandler.get(BYE).handleCommand(outData, null, new SessionContext());
         } else {
             System.out.printf("Socket timeout exception happened: [%s]", ex.getCause());
         }

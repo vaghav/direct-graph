@@ -2,7 +2,7 @@ package com.collibra.command.handlers;
 
 import com.collibra.exceptions.NodeNotFoundException;
 import com.collibra.graph.Graph;
-import com.collibra.graph.Node;
+import com.collibra.message.util.SessionContext;
 
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
@@ -22,17 +22,17 @@ public class RemoveNodeCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(PrintWriter outData, String receivedMessage) {
+    public void handleCommand(PrintWriter outData, String receivedMessage, SessionContext sessionContext) {
         Matcher removeNodeMatcher = removeNodePattern.matcher(receivedMessage);
         if (!removeNodeMatcher.find()) {
             throw new IllegalArgumentException(String.format("[%s] is not valid command for node removal",
                     receivedMessage));
         }
         try {
-            graph.removeNode(new Node(removeNodeMatcher.group("nodeName")));
+            graph.removeNode(removeNodeMatcher.group("nodeName"));
             sendMessage(outData, "NODE REMOVED");
         } catch (NodeNotFoundException ex) {
-            System.out.println("Node doesn't exist in the graph: " + ex.getMessage());
+            System.out.println(ex.getMessage());
             sendMessage(outData, "ERROR: NODE NOT FOUND");
         }
     }

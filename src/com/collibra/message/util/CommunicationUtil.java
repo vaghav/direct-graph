@@ -29,8 +29,16 @@ public final class CommunicationUtil {
         return incomingData;
     }
 
-    public static void handshake(PrintWriter outData) {
+    public static String handshake(PrintWriter outData, BufferedReader inData) throws IOException {
         sendMessage(outData, "HI, I AM " + UUID.randomUUID());
+        String receivedMessage = readReceivedMessage(inData);
+        Matcher clientNameMatcher = clientNamePattern.matcher(receivedMessage);
+        if (!clientNameMatcher.find()) {
+            throw new IllegalArgumentException(String.format("[%s] is not valid command for greeting",
+                    receivedMessage));
+        }
+        sendMessage(outData, "HI " + clientNameMatcher.group("clientName"));
+        return extractClientName(receivedMessage);
     }
 
     public static String extractClientName(String receivedMessage) {

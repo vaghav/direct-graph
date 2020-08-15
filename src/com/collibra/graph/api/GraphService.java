@@ -1,15 +1,15 @@
 package com.collibra.graph.api;
 
-import com.collibra.graph.Node;
+import com.collibra.exceptions.NodeNotFoundException;
 
 /**
  * Exposes the API for direct graph.
  */
 public interface GraphService {
     /**
-     * @param source      node from which starting processing
-     * @param destination node for which short path is found
+     * @param sourceNodeName      the starting node
+     * @param destinationNodeName the destination node
      * @return the value of the shortest path from source to destination
      */
-    Integer findShortestPath(Node source, Node destination);
+    Integer findShortestPath(String sourceNodeName, String destinationNodeName) throws NodeNotFoundException;
 }

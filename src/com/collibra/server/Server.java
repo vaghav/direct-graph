@@ -26,19 +26,19 @@ public class Server {
         try (ServerSocket listener = new ServerSocket(PORT_NUMBER)) {
             System.out.println("The server is running...");
             Socket socket;
+            Graph graph = new GraphImpl();
+            Map<Command, CommandHandler> commandToHandler = new ConcurrentHashMap<>();
+            commandToHandler.put(ADD_NODE, new AddNodeCommandHandler(graph));
+            commandToHandler.put(REMOVE_NODE, new RemoveNodeCommandHandler(graph));
+            commandToHandler.put(ADD_EDGE, new AddEdgeCommandHandler(graph));
+            commandToHandler.put(REMOVE_EDGE, new RemoveEdgeCommandHandler(graph));
+            commandToHandler.put(FIND_SHORTEST_PATH, new ShortestPathCommandHandler(new GraphServiceImpl(graph)));
+            commandToHandler.put(BYE, new ByeCommandHandler());
+            commandToHandler.put(INVALID, new InvalidCommandHandler());
             while (true) {
                 socket = listener.accept();
                 System.out.println("Accepted a connection");
                 socket.setSoTimeout(SO_TIMEOUT_MS);
-                Graph graph = new GraphImpl();
-                Map<Command, CommandHandler> commandToHandler = new ConcurrentHashMap<>();
-                commandToHandler.put(HI, new GreetingCommandHandler());
-                commandToHandler.put(ADD_NODE, new AddNodeCommandHandler(graph));
-                commandToHandler.put(REMOVE_NODE, new RemoveNodeCommandHandler(graph));
-                commandToHandler.put(ADD_EDGE, new AddEdgeCommandHandler(graph));
-                commandToHandler.put(REMOVE_EDGE, new RemoveEdgeCommandHandler(graph));
-                commandToHandler.put(FIND_SHORTEST_PATH, new ShortestPathCommandHandler(new GraphServiceImpl(graph)));
-                commandToHandler.put(INVALID, new InvalidCommandHandler());
                 new ServerThread(socket, commandToHandler).start();
             }
         }

@@ -2,7 +2,7 @@ package com.collibra.command.handlers;
 
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.graph.Graph;
-import com.collibra.graph.Node;
+import com.collibra.message.util.SessionContext;
 
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
@@ -22,17 +22,17 @@ public class AddNodeCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(PrintWriter outData, String receivedMessage) {
+    public void handleCommand(PrintWriter outData, String receivedMessage, SessionContext sessionContext) {
         Matcher addNodeMatcher = addNodePattern.matcher(receivedMessage);
         if (!addNodeMatcher.find()) {
             throw new IllegalArgumentException(String.format("[%s] is not valid command for node adding",
                     receivedMessage));
         }
         try {
-            graph.addNode(new Node(addNodeMatcher.group("nodeName")));
+            graph.addNode(addNodeMatcher.group("nodeName"));
             sendMessage(outData, "NODE ADDED");
         } catch (NodeAlreadyExistsException ex) {
-            System.out.println("Node already exist in the graph: " + ex.getMessage());
+            System.out.println(ex.getMessage());
             sendMessage(outData, "ERROR: NODE ALREADY EXISTS");
         }
     }

@@ -2,7 +2,7 @@ package com.collibra.command.handlers;
 
 import com.collibra.exceptions.NodeNotFoundException;
 import com.collibra.graph.Graph;
-import com.collibra.graph.Node;
+import com.collibra.message.util.SessionContext;
 
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
@@ -23,19 +23,19 @@ public class AddEdgeCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(PrintWriter outData, String receivedMessage) {
+    public void handleCommand(PrintWriter outData, String receivedMessage, SessionContext sessionContext) {
         Matcher addEdgeMatcher = addEdgePattern.matcher(receivedMessage);
         if (!addEdgeMatcher.find()) {
             throw new IllegalArgumentException(String.format("[%s] is not valid command for edge adding",
                     receivedMessage));
         }
         try {
-            graph.addEdge(new Node(addEdgeMatcher.group("fromNodeName")),
-                    new Node(addEdgeMatcher.group("toNodeName")),
+            graph.addEdge(addEdgeMatcher.group("fromNodeName"),
+                    addEdgeMatcher.group("toNodeName"),
                     Integer.parseInt(addEdgeMatcher.group("weight")));
             sendMessage(outData, "EDGE ADDED");
         } catch (NodeNotFoundException ex) {
-            System.out.println("Node doesn't exist in the graph: " + ex.getMessage());
+            System.out.println(ex.getMessage());
             sendMessage(outData, "ERROR: NODE NOT FOUND");
         }
     }

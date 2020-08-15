@@ -17,9 +17,9 @@ public interface Graph {
     Set<Node> getNodes();
 
     /**
-     * Adds node to the graph with provided node.
+     * Adds node to the graph with the provided node name.
      */
-    void addNode(Node node) throws NodeAlreadyExistsException;
+    void addNode(String nodeName) throws NodeAlreadyExistsException;
 
     /**
      * Adds nodes to the graph with provided node.
@@ -29,15 +29,21 @@ public interface Graph {
     /**
      * Adds edge from source to destination node with a given weight.
      */
-    void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException;
+    void addEdge(String source, String destination, int weight) throws NodeNotFoundException;
 
     /**
-     * Removes provided node from the graph.
+     * Removes node by node name from the graph.
      */
-    void removeNode(Node node) throws NodeNotFoundException;
+    void removeNode(String nodeName) throws NodeNotFoundException;
 
     /**
      * Removes edge from the graph.
      */
-    void removeEdge(Node source, Node destination) throws NodeNotFoundException;
+    void removeEdge(String sourceNodeName, String destinationNodeName) throws NodeNotFoundException;
+
+    /**
+     * Retrieve node from the graph.
+     * @return the found node or throws exception.
+     */
+    Node getNode(String nodeName) throws NodeNotFoundException;
 }

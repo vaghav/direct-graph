@@ -29,6 +29,6 @@ public final class CommandExtractor {
         } else if (receivedMessage.startsWith("SHORTEST PATH")) {
             return FIND_SHORTEST_PATH;
         }
-        return Command.INVALID;
+        return INVALID;
     }
 }

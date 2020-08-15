@@ -19,20 +19,21 @@ public class GraphImpl implements Graph {
     }
 
     @Override
-    public synchronized void addNode(Node node) throws NodeAlreadyExistsException {
+    public synchronized void addNode(String nodeName) throws NodeAlreadyExistsException {
+        Node node = new Node(nodeName);
         if (nodes.contains(node)) {
-            throw new NodeAlreadyExistsException("Node already exists in the graph: '" + node.getName() + "'");
+            throw new NodeAlreadyExistsException("Node already exists in the graph: '" + nodeName + "'");
         }
         nodes.add(node);
     }
 
     @Override
-    public synchronized void removeNode(Node node) throws NodeNotFoundException {
+    public synchronized void removeNode(String nodeName) throws NodeNotFoundException {
+        Node node = new Node(nodeName);
         if (!nodes.contains(node)) {
-            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + node.getName() + "'");
+            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'");
         }
         nodes.forEach(vertex -> vertex.getAdjacentNodes().remove(node));
-        node.getAdjacentNodes().clear();
         nodes.remove(node);
     }
 
@@ -42,22 +43,25 @@ public class GraphImpl implements Graph {
     }
 
     @Override
-    public synchronized void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException {
-        checkNodeExistence(source);
-        checkNodeExistence(destination);
-        source.getAdjacentNodes().putIfAbsent(destination, weight);
+    public synchronized void addEdge(String sourceNodeName, String destinationNodeName, int weight)
+            throws NodeNotFoundException {
+        Node sourceNode = getNode(sourceNodeName);
+        Node destNode = getNode(destinationNodeName);
+        System.out.printf("source: [%s], destination: [%s]%n", sourceNode.getName(), destNode.getName());
+        sourceNode.getAdjacentNodes().putIfAbsent(destNode, weight);
     }
 
     @Override
-    public synchronized void removeEdge(Node source, Node destination) throws NodeNotFoundException {
-        checkNodeExistence(source);
-        checkNodeExistence(destination);
-        source.getAdjacentNodes().remove(destination);
+    public synchronized void removeEdge(String sourceNodeName, String destinationNodeName)
+            throws NodeNotFoundException {
+        Node sourceNode = getNode(sourceNodeName);
+        Node destNode = getNode(destinationNodeName);
+        sourceNode.getAdjacentNodes().remove(destNode);
     }
 
-    private void checkNodeExistence(Node node) throws NodeNotFoundException {
-        if (!nodes.contains(node)) {
-            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + node.getName() + "'");
-        }
+    @Override
+    public Node getNode(String nodeName) throws NodeNotFoundException {
+        return nodes.stream().filter(node -> node.getName().equals(nodeName)).findFirst()
+                .orElseThrow(() -> new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'"));
     }
 }

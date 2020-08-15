@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GraphServiceImplTest {
 
     @Test
-    public void findShortestPath_returnsShortestPathValueCase1() {
+    public void findShortestPath_returnsShortestPathValueCase1() throws Exception {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
@@ -21,13 +21,13 @@ class GraphServiceImplTest {
         Graph graph = new GraphImpl();
         graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
         GraphServiceImpl service = new GraphServiceImpl(graph);
-        Integer shortestPath = service.findShortestPath(nodeA, nodeC);
+        Integer shortestPath = service.findShortestPath("A", "C");
 
         assertThat(shortestPath).isEqualTo(13);
     }
 
     @Test
-    public void findShortestPath_returnsShortestPathValueCase2() {
+    public void findShortestPath_returnsShortestPathValueCase2() throws Exception {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
@@ -37,13 +37,13 @@ class GraphServiceImplTest {
         Graph graph = new GraphImpl();
         graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
         GraphServiceImpl service = new GraphServiceImpl(graph);
-        Integer shortestPath = service.findShortestPath(nodeA, nodeC);
+        Integer shortestPath = service.findShortestPath("A", "C");
 
         assertThat(shortestPath).isEqualTo(9);
     }
 
     @Test
-    public void findShortestPath_returnsShortestPathValueCase3() {
+    public void findShortestPath_returnsShortestPathValueCase3() throws Exception {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
@@ -53,7 +53,7 @@ class GraphServiceImplTest {
         Graph graph = new GraphImpl();
         graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
         GraphServiceImpl service = new GraphServiceImpl(graph);
-        Integer shortestPath = service.findShortestPath(nodeA, nodeC);
+        Integer shortestPath = service.findShortestPath("A", "C");
 
         assertThat(shortestPath).isEqualTo(9);
     }
