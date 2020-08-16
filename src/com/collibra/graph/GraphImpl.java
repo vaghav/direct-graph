@@ -37,6 +37,7 @@ public class GraphImpl implements Graph {
         nodes.remove(node);
     }
 
+    //TODO: Change the parameter to List<String> and refactor unit tests.
     @Override
     public synchronized void addNodes(List<Node> nodes) {
         this.nodes.addAll(nodes);

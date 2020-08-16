@@ -22,7 +22,7 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
-    public Integer findShortestPath(String sourceNode, String destinationNode) throws NodeNotFoundException {
+    public synchronized Integer findShortestPath(String sourceNode, String destinationNode) throws NodeNotFoundException {
         Node source = graph.getNode(sourceNode);
         Node destination = graph.getNode(destinationNode);
         // Track shortest path for future if needed.
