@@ -3,8 +3,8 @@ package com.collibra.graph;
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.exceptions.NodeNotFoundException;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Exposes the API for graph creation and processing.
@@ -14,7 +14,7 @@ public interface Graph {
     /**
      * Return graph nodes.
      */
-    Set<Node> getNodes();
+    Collection<Node> getNodes();
 
     /**
      * Adds node to the graph with the provided node name.
@@ -43,6 +43,7 @@ public interface Graph {
 
     /**
      * Retrieve node from the graph.
+     *
      * @return the found node or throws exception.
      */
     Node getNode(String nodeName) throws NodeNotFoundException;

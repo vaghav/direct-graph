@@ -28,6 +28,8 @@ public final class CommandExtractor {
             return REMOVE_EDGE;
         } else if (receivedMessage.startsWith("SHORTEST PATH")) {
             return FIND_SHORTEST_PATH;
+        } else if (receivedMessage.startsWith("CLOSER THAN")) {
+            return CLOSEST_NEIGHBOURS;
         }
         return INVALID;
     }

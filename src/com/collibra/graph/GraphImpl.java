@@ -3,44 +3,44 @@ package com.collibra.graph;
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.exceptions.NodeNotFoundException;
 
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Exposes the API for directed graph.
  */
 public class GraphImpl implements Graph {
-    private final Set<Node> nodes = new HashSet<>();
+    private final Map<String, Node> nameToNodeMap = new HashMap<>();
 
     @Override
-    public Set<Node> getNodes() {
-        return nodes;
+    public Collection<Node> getNodes() {
+        return nameToNodeMap.values();
     }
 
     @Override
     public synchronized void addNode(String nodeName) throws NodeAlreadyExistsException {
-        Node node = new Node(nodeName);
-        if (nodes.contains(node)) {
+        if (nameToNodeMap.containsKey(nodeName)) {
             throw new NodeAlreadyExistsException("Node already exists in the graph: '" + nodeName + "'");
         }
-        nodes.add(node);
+        nameToNodeMap.put(nodeName, new Node(nodeName));
     }
 
     @Override
     public synchronized void removeNode(String nodeName) throws NodeNotFoundException {
-        Node node = new Node(nodeName);
-        if (!nodes.contains(node)) {
+        if (!nameToNodeMap.containsKey(nodeName)) {
             throw new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'");
         }
-        nodes.forEach(vertex -> vertex.getAdjacentNodes().remove(node));
-        nodes.remove(node);
+        Node node = new Node(nodeName);
+        nameToNodeMap.values().forEach(vertex -> vertex.getAdjacentNodes().remove(node));
+        nameToNodeMap.remove(nodeName);
     }
 
     //TODO: Change the parameter to List<String> and refactor unit tests.
     @Override
     public synchronized void addNodes(List<Node> nodes) {
-        this.nodes.addAll(nodes);
+        nodes.forEach(node -> nameToNodeMap.put(node.getName(), node));
     }
 
     @Override
@@ -62,7 +62,10 @@ public class GraphImpl implements Graph {
 
     @Override
     public Node getNode(String nodeName) throws NodeNotFoundException {
-        return nodes.stream().filter(node -> node.getName().equals(nodeName)).findFirst()
-                .orElseThrow(() -> new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'"));
+        Node node = nameToNodeMap.get(nodeName);
+        if (node == null) {
+            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'");
+        }
+        return node;
     }
 }

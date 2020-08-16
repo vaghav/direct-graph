@@ -4,5 +4,5 @@ package com.collibra.message.util;
  * Represents the possible commands received from the client.
  */
 public enum Command {
-    INVALID, HI, BYE, ADD_NODE, REMOVE_NODE, ADD_EDGE, REMOVE_EDGE, FIND_SHORTEST_PATH;
+    INVALID, HI, BYE, ADD_NODE, REMOVE_NODE, ADD_EDGE, REMOVE_EDGE, FIND_SHORTEST_PATH, CLOSEST_NEIGHBOURS;
 }

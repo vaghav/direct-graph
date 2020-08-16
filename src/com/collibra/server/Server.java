@@ -33,6 +33,7 @@ public class Server {
             commandToHandler.put(ADD_EDGE, new AddEdgeCommandHandler(graph));
             commandToHandler.put(REMOVE_EDGE, new RemoveEdgeCommandHandler(graph));
             commandToHandler.put(FIND_SHORTEST_PATH, new ShortestPathCommandHandler(new GraphServiceImpl(graph)));
+            commandToHandler.put(CLOSEST_NEIGHBOURS, new ClosestNeighbourCommandHandler(new GraphServiceImpl(graph)));
             commandToHandler.put(BYE, new ByeCommandHandler());
             commandToHandler.put(INVALID, new InvalidCommandHandler());
             while (true) {

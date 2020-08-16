@@ -6,6 +6,7 @@ import com.collibra.graph.Node;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implements direct graph API.
@@ -20,11 +21,15 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
-    public synchronized Integer findShortestPath(String sourceNode, String destinationNode)
+    public synchronized Integer findShortestPath(String sourceNodeName, String destinationNodeName)
             throws NodeNotFoundException {
+        Node destinationNod = graph.getNode(destinationNodeName);
+        return getNodeToDistanceMap(sourceNodeName).get(destinationNod);
+    }
+
+    private synchronized Map<Node, Integer> getNodeToDistanceMap(String sourceNode) throws NodeNotFoundException {
         Node source = graph.getNode(sourceNode);
-        Node destination = graph.getNode(destinationNode);
-        // Track shortest path for Phase 4.
+        // Track shortest path for future if needed.
         Map<Node, List<Node>> nodeToShortestPath = new HashMap<>();
         graph.getNodes().forEach(node -> nodeToShortestPath.put(node, new LinkedList<>()));
 
@@ -54,11 +59,19 @@ public class GraphServiceImpl implements GraphService {
                 }
             }
             settledNodes.add(processingNode);
-            if (processingNode.getName().equals(destination.getName())) {
-                return nodeToDistance.get(destination);
-            }
         }
-        return nodeToDistance.get(destination);
+        return nodeToDistance;
+    }
+
+    @Override
+    public synchronized String findClosestNeighbours(String sourceNodeName, int weight) throws NodeNotFoundException {
+        Map<Node, Integer> nodeToDistanceMap = getNodeToDistanceMap(sourceNodeName);
+        return nodeToDistanceMap.entrySet().stream()
+                .filter(entry -> entry.getValue() < weight)
+                .filter(entry -> !entry.getKey().getName().equals(sourceNodeName))
+                .map(entry -> entry.getKey().getName())
+                .sorted()
+                .collect(Collectors.joining(","));
     }
 
     private static void trackShortestPath(Map<Node, List<Node>> nodeToShortestPath, Node processingNode) {
