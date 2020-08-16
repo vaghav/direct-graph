@@ -61,7 +61,7 @@ public class GraphImpl implements Graph {
     }
 
     @Override
-    public Node getNode(String nodeName) throws NodeNotFoundException {
+    public synchronized Node getNode(String nodeName) throws NodeNotFoundException {
         Node node = nameToNodeMap.get(nodeName);
         if (node == null) {
             throw new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'");
