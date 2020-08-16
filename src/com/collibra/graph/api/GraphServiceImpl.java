@@ -3,6 +3,7 @@ package com.collibra.graph.api;
 import com.collibra.exceptions.NodeNotFoundException;
 import com.collibra.graph.Graph;
 import com.collibra.graph.Node;
+import javafx.util.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
  * Implements direct graph API.
  */
 public class GraphServiceImpl implements GraphService {
+    private static final int QUEUE_INITIAL_CAPACITY = 11;
     private static final int NODE_DISTANCE_TO_ITSELF = 0;
     private final Graph graph;
 
@@ -55,22 +57,22 @@ public class GraphServiceImpl implements GraphService {
         nodeToDistance.put(source, NODE_DISTANCE_TO_ITSELF);
         // Nodes already in shortest path.
         Set<Node> settledNodes = new HashSet<>();
-        Set<Node> unsettledNodes = new HashSet<>();
+        PriorityQueue<Pair<Node, Integer>> unsettledNodesQueue = new PriorityQueue<>(QUEUE_INITIAL_CAPACITY,
+                Comparator.comparingInt(Pair::getValue));
 
-        unsettledNodes.add(source);
-        while (!unsettledNodes.isEmpty()) {
-            Node processingNode = getLowestDistanceNode(unsettledNodes, nodeToDistance);
-            unsettledNodes.remove(processingNode);
+        unsettledNodesQueue.offer(new Pair<>(source, NODE_DISTANCE_TO_ITSELF));
+        while (!unsettledNodesQueue.isEmpty()) {
+            Node processingNode = unsettledNodesQueue.poll().getKey();
             settledNodes.add(processingNode);
-            for (Map.Entry<Node, Integer> adjacencyPair : processingNode.getAdjacentNodes().entrySet()) {
+            for (Map.Entry<Node, List<Integer>> adjacencyPair : processingNode.getAdjacentNodes().entrySet()) {
                 Node adjacentNode = adjacencyPair.getKey();
-                Integer edgeWeight = adjacencyPair.getValue();
+                Integer minWeight = adjacencyPair.getValue().stream().min(Comparator.naturalOrder()).get();
                 if (!settledNodes.contains(adjacentNode)) {
-                    int newDistance = nodeToDistance.get(processingNode) + edgeWeight;
+                    int newDistance = nodeToDistance.get(processingNode) + minWeight;
                     int currentDistance = nodeToDistance.get(adjacentNode);
                     if (newDistance < currentDistance) {
                         nodeToDistance.put(adjacentNode, newDistance);
-                        unsettledNodes.add(adjacentNode);
+                        unsettledNodesQueue.offer(new Pair<>(adjacentNode, newDistance));
                         trackShortestPath(nodeToShortestPath, processingNode);
                     }
                 }

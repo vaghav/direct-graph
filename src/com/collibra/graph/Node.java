@@ -8,7 +8,7 @@ import java.util.*;
 public class Node {
     private final String name;
 
-    private final Map<Node, Integer> adjacentNodes = new HashMap<>();
+    private final Map<Node, List<Integer>> adjacentNodes = new HashMap<>();
 
     public Node(String name) {
         if (!name.matches("^[A-Za-z0-9\\-]+$")) {
@@ -21,7 +21,7 @@ public class Node {
         return name;
     }
 
-    public Map<Node, Integer> getAdjacentNodes() {
+    public Map<Node, List<Integer>> getAdjacentNodes() {
         return adjacentNodes;
     }
 

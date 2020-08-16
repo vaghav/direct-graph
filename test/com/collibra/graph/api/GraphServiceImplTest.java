@@ -3,8 +3,9 @@ package com.collibra.graph.api;
 import com.collibra.graph.Graph;
 import com.collibra.graph.GraphImpl;
 import com.collibra.graph.Node;
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,11 +16,11 @@ class GraphServiceImplTest {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
-        nodeA.getAdjacentNodes().put(nodeB, 10);
-        nodeA.getAdjacentNodes().put(nodeC, 15);
-        nodeB.getAdjacentNodes().put(nodeC, 3);
+        nodeA.getAdjacentNodes().put(nodeB, Arrays.asList(10));
+        nodeA.getAdjacentNodes().put(nodeC, Arrays.asList(15));
+        nodeB.getAdjacentNodes().put(nodeC, Arrays.asList(3));
         Graph graph = new GraphImpl();
-        graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
+        graph.addNodes(Arrays.asList(nodeA, nodeB, nodeC));
         GraphServiceImpl service = new GraphServiceImpl(graph);
         Integer shortestPath = service.findShortestPath("A", "C");
 
@@ -31,11 +32,11 @@ class GraphServiceImplTest {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
-        nodeA.getAdjacentNodes().put(nodeB, 10);
-        nodeA.getAdjacentNodes().put(nodeC, 9);
-        nodeB.getAdjacentNodes().put(nodeC, 3);
+        nodeA.getAdjacentNodes().put(nodeB, Arrays.asList(10));
+        nodeA.getAdjacentNodes().put(nodeC, Arrays.asList(9));
+        nodeB.getAdjacentNodes().put(nodeC, Arrays.asList(3));
         Graph graph = new GraphImpl();
-        graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
+        graph.addNodes(Arrays.asList(nodeA, nodeB, nodeC));
         GraphServiceImpl service = new GraphServiceImpl(graph);
         Integer shortestPath = service.findShortestPath("A", "C");
 
@@ -47,11 +48,11 @@ class GraphServiceImplTest {
         Node nodeA = new Node("A");
         Node nodeB = new Node("B");
         Node nodeC = new Node("C");
-        nodeA.getAdjacentNodes().put(nodeB, 10);
-        nodeA.getAdjacentNodes().put(nodeC, 9);
-        nodeB.getAdjacentNodes().put(nodeC, 3);
+        nodeA.getAdjacentNodes().put(nodeB, Arrays.asList(10));
+        nodeA.getAdjacentNodes().put(nodeC, Arrays.asList(9));
+        nodeB.getAdjacentNodes().put(nodeC, Arrays.asList(3));
         Graph graph = new GraphImpl();
-        graph.addNodes(ImmutableList.of(nodeA, nodeB, nodeC));
+        graph.addNodes(Arrays.asList(nodeA, nodeB, nodeC));
         GraphServiceImpl service = new GraphServiceImpl(graph);
         Integer shortestPath = service.findShortestPath("A", "C");
 

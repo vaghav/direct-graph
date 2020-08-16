@@ -3,10 +3,7 @@ package com.collibra.graph;
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.exceptions.NodeNotFoundException;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Exposes the API for directed graph.
@@ -15,7 +12,7 @@ public class GraphImpl implements Graph {
     private final Map<String, Node> nameToNodeMap = new HashMap<>();
 
     @Override
-    public Collection<Node> getNodes() {
+    public synchronized Collection<Node> getNodes() {
         return nameToNodeMap.values();
     }
 
@@ -49,7 +46,9 @@ public class GraphImpl implements Graph {
         Node sourceNode = getNode(sourceNodeName);
         Node destNode = getNode(destinationNodeName);
         System.out.printf("source: [%s], destination: [%s]%n", sourceNode.getName(), destNode.getName());
-        sourceNode.getAdjacentNodes().putIfAbsent(destNode, weight);
+        List<Integer> weights = sourceNode.getAdjacentNodes().getOrDefault(destNode, new ArrayList<>());
+        weights.add(weight);
+        sourceNode.getAdjacentNodes().putIfAbsent(destNode, weights);
     }
 
     @Override
