@@ -11,8 +11,6 @@ import java.util.*;
  * Implements direct graph API.
  */
 public class GraphServiceImpl implements GraphService {
-    //TODO: Handle case for unconnected nodes.
-
     private static final int QUEUE_INITIAL_CAPACITY = 11;
     private static final int NODE_DISTANCE_TO_ITSELF = 0;
     private final Graph graph;
@@ -22,10 +20,11 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
-    public synchronized Integer findShortestPath(String sourceNode, String destinationNode) throws NodeNotFoundException {
+    public synchronized Integer findShortestPath(String sourceNode, String destinationNode)
+            throws NodeNotFoundException {
         Node source = graph.getNode(sourceNode);
         Node destination = graph.getNode(destinationNode);
-        // Track shortest path for future if needed.
+        // Track shortest path for Phase 4.
         Map<Node, List<Node>> nodeToShortestPath = new HashMap<>();
         graph.getNodes().forEach(node -> nodeToShortestPath.put(node, new LinkedList<>()));
 
@@ -50,7 +49,6 @@ public class GraphServiceImpl implements GraphService {
                     if (newDistance < currentDistance) {
                         nodeToDistance.put(adjacentNode, newDistance);
                         unsettledNodesQueue.offer(new Pair<>(adjacentNode, newDistance));
-                        //TODO: return when fond destination node
                         trackShortestPath(nodeToShortestPath, processingNode);
                     }
                 }
