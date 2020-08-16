@@ -39,12 +39,6 @@ public class GraphServiceImpl implements GraphService {
                 .collect(Collectors.joining(","));
     }
 
-    private static void trackShortestPath(Map<Node, List<Node>> nodeToShortestPath, Node processingNode) {
-        List<Node> shortestPath = new LinkedList<>(nodeToShortestPath.get(processingNode));
-        shortestPath.add(processingNode);
-        nodeToShortestPath.put(processingNode, shortestPath);
-    }
-
     private Map<Node, Integer> getNodeToDistanceMap(String sourceNode) throws NodeNotFoundException {
         Node source = graph.getNode(sourceNode);
         // Track shortest path for future if needed.
@@ -81,18 +75,9 @@ public class GraphServiceImpl implements GraphService {
         return nodeToDistance;
     }
 
-    private static Node getLowestDistanceNode(Set<Node> unsettledNodes,
-                                              Map<Node, Integer> nodeToDistanceMap) {
-        Node lowestDistanceNode = null;
-        int lowestDistance = Integer.MAX_VALUE;
-        for (Node node : unsettledNodes) {
-            int nodeDistance = nodeToDistanceMap.get(node);
-            if (nodeDistance < lowestDistance) {
-                lowestDistance = nodeDistance;
-                lowestDistanceNode = node;
-            }
-        }
-        return lowestDistanceNode;
+    private static void trackShortestPath(Map<Node, List<Node>> nodeToShortestPath, Node processingNode) {
+        List<Node> shortestPath = new LinkedList<>(nodeToShortestPath.get(processingNode));
+        shortestPath.add(processingNode);
+        nodeToShortestPath.put(processingNode, shortestPath);
     }
-
 }
