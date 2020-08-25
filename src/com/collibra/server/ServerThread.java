@@ -46,9 +46,9 @@ public class ServerThread extends Thread {
         } catch (SocketTimeoutException ex) {
             handleSocketTimeoutException(outData, ex);
         } catch (IOException ex) {
-            System.out.printf("Connection interrupted due to [%s]%n", ex.getCause());
+            System.out.printf("Connection interrupted due to [%s]%n", ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            System.out.printf("Received invalid arguments for command. [%s]%n", ex.getCause());
+            System.out.printf("Received invalid arguments for command. [%s]%n", ex.getMessage());
             commandToHandler.get(INVALID).handleCommand(outData, "", new SessionContext());
         } finally {
             releaseResources(outData);
@@ -59,7 +59,7 @@ public class ServerThread extends Thread {
         if (outData != null) {
             commandToHandler.get(BYE).handleCommand(outData, null, new SessionContext());
         } else {
-            System.out.printf("Socket timeout exception happened: [%s]", ex.getCause());
+            System.out.printf("Socket timeout exception happened: [%s]", ex.getMessage());
         }
     }
 

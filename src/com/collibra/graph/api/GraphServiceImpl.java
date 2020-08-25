@@ -21,22 +21,28 @@ public class GraphServiceImpl implements GraphService {
     }
 
     @Override
-    public synchronized Integer findShortestPath(String sourceNodeName, String destinationNodeName)
+    public Integer findShortestPath(String sourceNodeName, String destinationNodeName)
             throws NodeNotFoundException {
-        Node destinationNod = graph.getNode(destinationNodeName);
-        return getNodeToDistanceMap(sourceNodeName).get(destinationNod);
+        System.out.printf("=====graph nodes: [%s]", graph.getNodes().size());
+        synchronized (graph) {
+            Node destinationNod = graph.getNode(destinationNodeName);
+            return getNodeToDistanceMap(sourceNodeName).get(destinationNod);
+        }
     }
 
     @Override
-    public synchronized String findClosestNeighbours(String sourceNodeName, int weight)
+    public String findClosestNeighbours(String sourceNodeName, int weight)
             throws NodeNotFoundException {
-        Map<Node, Integer> nodeToDistanceMap = getNodeToDistanceMap(sourceNodeName);
-        return nodeToDistanceMap.entrySet().stream()
-                .filter(entry -> entry.getValue() < weight)
-                .filter(entry -> !entry.getKey().getName().equals(sourceNodeName))
-                .map(entry -> entry.getKey().getName())
-                .sorted()
-                .collect(Collectors.joining(","));
+        System.out.printf("=====graph nodes: [%s]", graph.getNodes().size());
+        synchronized (graph) {
+            Map<Node, Integer> nodeToDistanceMap = getNodeToDistanceMap(sourceNodeName);
+            return nodeToDistanceMap.entrySet().stream()
+                    .filter(entry -> entry.getValue() < weight)
+                    .filter(entry -> !entry.getKey().getName().equals(sourceNodeName))
+                    .map(entry -> entry.getKey().getName())
+                    .sorted()
+                    .collect(Collectors.joining(","));
+        }
     }
 
     private Map<Node, Integer> getNodeToDistanceMap(String sourceNode) throws NodeNotFoundException {
