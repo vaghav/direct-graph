@@ -3,35 +3,48 @@ package com.collibra.graph;
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.exceptions.NodeNotFoundException;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
- * Expose API for graph creation and processing.
+ * Exposes the API for graph creation and processing.
  */
 public interface Graph {
 
     /**
-     * Add node to the graph with provided node.
+     * Return graph nodes.
      */
-    void addNode(Node node) throws NodeAlreadyExistsException;
+    Collection<Node> getNodes();
 
     /**
-     * Add nodes to the graph with provided node.
+     * Adds node to the graph with the provided node name.
+     */
+    void addNode(String nodeName) throws NodeAlreadyExistsException;
+
+    /**
+     * Adds nodes to the graph with provided node.
      */
     void addNodes(List<Node> nodes);
 
     /**
-     * Add edge from source to destination node with a given weight.
+     * Adds edge from source to destination node with a given weight.
      */
-    void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException;
+    void addEdge(String source, String destination, int weight) throws NodeNotFoundException;
 
     /**
-     * Remove provided node from the graph.
+     * Removes node by node name from the graph.
      */
-    void removeNode(Node node) throws NodeNotFoundException;
+    void removeNode(String nodeName) throws NodeNotFoundException;
 
     /**
-     * Remove edge from the graph.
+     * Removes edge from the graph.
      */
-    void removeEdge(Node source, Node destination) throws NodeNotFoundException;
+    void removeEdge(String sourceNodeName, String destinationNodeName) throws NodeNotFoundException;
+
+    /**
+     * Retrieve node from the graph.
+     *
+     * @return the found node or throws exception.
+     */
+    Node getNode(String nodeName) throws NodeNotFoundException;
 }

@@ -3,6 +3,7 @@ package com.collibra.server;
 import com.collibra.command.handlers.*;
 import com.collibra.graph.Graph;
 import com.collibra.graph.GraphImpl;
+import com.collibra.graph.api.GraphServiceImpl;
 import com.collibra.message.util.Command;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.collibra.message.util.Command.*;
 
 /**
- * Simple TCP/IP socket server implementation.
+ * Implements simple TCP/IP socket server.
  */
 public class Server {
 
@@ -24,18 +25,21 @@ public class Server {
     public static void main(String[] args) throws IOException {
         try (ServerSocket listener = new ServerSocket(PORT_NUMBER)) {
             System.out.println("The server is running...");
-            Socket socket = null;
+            Socket socket;
+            Graph graph = new GraphImpl();
+            Map<Command, CommandHandler> commandToHandler = new ConcurrentHashMap<>();
+            commandToHandler.put(ADD_NODE, new AddNodeCommandHandler(graph));
+            commandToHandler.put(REMOVE_NODE, new RemoveNodeCommandHandler(graph));
+            commandToHandler.put(ADD_EDGE, new AddEdgeCommandHandler(graph));
+            commandToHandler.put(REMOVE_EDGE, new RemoveEdgeCommandHandler(graph));
+            commandToHandler.put(FIND_SHORTEST_PATH, new ShortestPathCommandHandler(new GraphServiceImpl(graph)));
+            commandToHandler.put(CLOSEST_NEIGHBOURS, new ClosestNeighbourCommandHandler(new GraphServiceImpl(graph)));
+            commandToHandler.put(BYE, new ByeCommandHandler());
+            commandToHandler.put(INVALID, new InvalidCommandHandler());
             while (true) {
                 socket = listener.accept();
                 System.out.println("Accepted a connection");
                 socket.setSoTimeout(SO_TIMEOUT_MS);
-                Graph graph = new GraphImpl();
-                Map<Command, CommandHandler> commandToHandler = new ConcurrentHashMap<>();
-                commandToHandler.put(ADD_NODE, new AddNodeCommandHandler(graph));
-                commandToHandler.put(REMOVE_NODE, new RemoveNodeCommandHandler(graph));
-                commandToHandler.put(ADD_EDGE, new AddEdgeCommandHandler(graph));
-                commandToHandler.put(REMOVE_EDGE, new RemoveEdgeCommandHandler(graph));
-                commandToHandler.put(INVALID, new InvalidCommandHandler());
                 new ServerThread(socket, commandToHandler).start();
             }
         }

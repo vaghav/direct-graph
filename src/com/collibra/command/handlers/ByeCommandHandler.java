@@ -1,27 +1,25 @@
 package com.collibra.command.handlers;
 
-import com.collibra.message.util.ParsedMessage;
+import com.collibra.message.util.SessionContext;
 
 import java.io.PrintWriter;
 
-import static com.collibra.message.util.MessageUtil.sendMessage;
+import static com.collibra.message.util.CommunicationUtil.sendMessage;
 
 /**
- * Bye edge command handler implementation.
+ * Implements bye command handler.
  */
 public class ByeCommandHandler implements CommandHandler {
-    private final String clientName;
-    private final long startTime;
-
-    public ByeCommandHandler(String clientName, long startTime) {
-        this.clientName = clientName;
-        this.startTime = startTime;
-    }
 
     @Override
-    public void handleCommand(PrintWriter outData, ParsedMessage parsedMessage) {
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1000000;
-        sendMessage(outData, String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
+    public void handleCommand(PrintWriter outData, String parsedMessage, SessionContext sessionContext) {
+        String clientName = sessionContext.getClientName();
+        if (clientName != null) {
+            long endTime = System.nanoTime();
+            long duration = (endTime - sessionContext.getStartTime()) / 1000000;
+            sendMessage(outData, String.format("BYE %s, WE SPOKE FOR %d MS", clientName, duration));
+        } else {
+            sendMessage(outData, "BYE");
+        }
     }
 }

@@ -3,64 +3,68 @@ package com.collibra.graph;
 import com.collibra.exceptions.NodeAlreadyExistsException;
 import com.collibra.exceptions.NodeNotFoundException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
- * Implementation of directed graph API.
+ * Exposes the API for directed graph.
  */
 public class GraphImpl implements Graph {
-    private final Set<Node> nodes = new HashSet<>();
+    private final Map<String, Node> nameToNodeMap = new HashMap<>();
 
     @Override
-    public synchronized void addNode(Node node) throws NodeAlreadyExistsException {
-        if (nodes.contains(node)) {
-            throw new NodeAlreadyExistsException("ERROR: NODE ALREADY EXISTS");
-        }
-        nodes.add(node);
+    public synchronized Collection<Node> getNodes() {
+        return nameToNodeMap.values();
     }
 
     @Override
-    public synchronized void removeNode(Node node) throws NodeNotFoundException {
-        if (!nodes.contains(node)) {
-            throw new NodeNotFoundException("ERROR: NODE NOT FOUND");
+    public synchronized void addNode(String nodeName) throws NodeAlreadyExistsException {
+        if (nameToNodeMap.containsKey(nodeName)) {
+            throw new NodeAlreadyExistsException("Node already exists in the graph: '" + nodeName + "'");
         }
-        node.getAdjacentNodes().clear();
-        nodes.remove(node);
+        nameToNodeMap.put(nodeName, new Node(nodeName));
     }
 
+    @Override
+    public synchronized void removeNode(String nodeName) throws NodeNotFoundException {
+        if (!nameToNodeMap.containsKey(nodeName)) {
+            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'");
+        }
+        Node node = new Node(nodeName);
+        nameToNodeMap.values().forEach(vertex -> vertex.getAdjacentNodes().remove(node));
+        nameToNodeMap.remove(nodeName);
+    }
+
+    //TODO: Change the parameter to List<String> and refactor unit tests.
     @Override
     public synchronized void addNodes(List<Node> nodes) {
-        this.nodes.addAll(nodes);
+        nodes.forEach(node -> nameToNodeMap.put(node.getName(), node));
     }
 
     @Override
-    public synchronized void addEdge(Node source, Node destination, int weight) throws NodeNotFoundException {
-        checkNodeExistence(source);
-        checkNodeExistence(destination);
-        if (nodes.contains(source)) {
-            source.getAdjacentNodes().putIfAbsent(destination, weight);
-        }
+    public synchronized void addEdge(String sourceNodeName, String destinationNodeName, int weight)
+            throws NodeNotFoundException {
+        Node sourceNode = getNode(sourceNodeName);
+        Node destNode = getNode(destinationNodeName);
+        System.out.printf("source: [%s], destination: [%s]%n", sourceNode.getName(), destNode.getName());
+        List<Integer> weights = sourceNode.getAdjacentNodes().getOrDefault(destNode, new ArrayList<>());
+        weights.add(weight);
+        sourceNode.getAdjacentNodes().putIfAbsent(destNode, weights);
     }
 
     @Override
-    public synchronized void removeEdge(Node source, Node destination) throws NodeNotFoundException {
-        checkNodeExistence(source);
-        checkNodeExistence(destination);
-        if (nodes.contains(source)) {
-            source.getAdjacentNodes().remove(destination);
-        }
+    public synchronized void removeEdge(String sourceNodeName, String destinationNodeName)
+            throws NodeNotFoundException {
+        Node sourceNode = getNode(sourceNodeName);
+        Node destNode = getNode(destinationNodeName);
+        sourceNode.getAdjacentNodes().remove(destNode);
     }
 
-    private void checkNodeExistence(Node source) throws NodeNotFoundException {
-        if (!nodes.contains(source)) {
-            throw new NodeNotFoundException("ERROR: NODE NOT FOUND.");
+    @Override
+    public synchronized Node getNode(String nodeName) throws NodeNotFoundException {
+        Node node = nameToNodeMap.get(nodeName);
+        if (node == null) {
+            throw new NodeNotFoundException("Node doesn't exist in the graph: '" + nodeName + "'");
         }
-    }
-
-    //TODO: Rewrite unit tests and remove the method
-    Set<Node> getNodes() {
-        return nodes;
+        return node;
     }
 }
